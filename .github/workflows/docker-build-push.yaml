@@ -5,6 +5,15 @@ on:
   push:
     branches:
       - main # Trigger on pushes to the main branch
+    paths:
+      - 'cart/**'
+      - 'catalogue/**'
+      - 'dispatch/**'
+      - 'payment/**'
+      - 'ratings/**'
+      - 'shipping/**'
+      - 'user/**'
+      - 'web/**'
   workflow_dispatch:
 
 jobs:
