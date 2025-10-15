@@ -1,0 +1,11 @@
+variable "cluster_name" { type = string }
+variable "cluster_security_sg" { type = string }
+variable "subnet_ids" { type = list(string) }
+variable "vpc_id" { type = string }
+variable "node_instance_profile_name" { type = string }
+variable "node_role_arn" { type = string }
+variable "instance_type" { type = string }
+variable "desired_size" { type = number }
+variable "min_size" { type = number }
+variable "max_size" { type = number }
+variable "eks_version" { type = string }
