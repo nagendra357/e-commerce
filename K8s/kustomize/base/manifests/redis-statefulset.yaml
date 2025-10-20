@@ -1,49 +1,49 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mongodb
   labels:
-    service: mongodb
+    service: redis
+  name: redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      service: mongodb
-  serviceName: mongodb
+      service: redis
+  serviceName: redis
   template:
     metadata:
       labels:
-        service: mongodb
+        service: redis
     spec:
       {{ if .Values.psp.enabled }}
       serviceAccountName: robot-shop
       {{ end }}
       containers:
-      - name: mongodb
-        image: {{ .Values.image.repo }}/rs-mongodb:{{ .Values.image.version }}
+      - name: redis
+        image: redis:4.0.6
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-        - containerPort: 27017
+        - containerPort: 6379
         volumeMounts:
-        - name: data
-          mountPath: /data/db
+          - name: data
+            mountPath: /mnt/redis
         resources:
           limits:
             cpu: 200m
-            memory: 200Mi
+            memory: 100Mi
           requests:
             cpu: 100m
-            memory: 100Mi
+            memory: 50Mi
       restartPolicy: Always
-      {{- with .Values.mongodb.affinity }}
+      {{- with .Values.redis.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.mongodb.nodeSelector }}
+      {{- with .Values.redis.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.mongodb.tolerations }}
+      {{- with .Values.redis.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -53,9 +53,10 @@ spec:
       spec:
         accessModes: [ "ReadWriteOnce" ]
         {{ if not .Values.openshift }}
-        storageClassName: {{ .Values.mongodb.storageClassName }}
+        storageClassName: {{ .Values.redis.storageClassName }}
         volumeMode: Filesystem
         {{ end }}
         resources:
           requests:
-            storage: {{ .Values.mongodb.storage }}
+            storage: 1Gi
+

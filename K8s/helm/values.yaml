@@ -39,9 +39,13 @@ catalogue: {}
 
 dispatch: {}
 
-mongodb: {}
+mongodb:
+  storageClassName: gp3
+  storage: 10Gi
 
-mysql: {}
+mysql:
+  storageClassName: gp3
+  storage: 10Gi
 
 payment:
   # Alternative payment gateway URL
@@ -55,7 +59,7 @@ ratings: {}
 
 redis:
   # Storage class to use with redis statefulset.
-  storageClassName: standard
+  storageClassName: gp3
 
 shipping: {}
 
