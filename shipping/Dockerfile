@@ -1,36 +1,36 @@
 #
-# Build
+# Build Stage
 #
-FROM debian:10 AS build
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        ca-certificates-java \
-        maven && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    update-ca-certificates -f
+FROM maven:3.8.7-openjdk-8 AS build
 
 WORKDIR /opt/shipping
 
-COPY pom.xml /opt/shipping/
-RUN mvn dependency:resolve
-COPY src /opt/shipping/src/
-RUN mvn package
+# Copy pom.xml and download dependencies (use cache if unchanged)
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Copy the rest of the source code
+COPY src ./src
+
+# Build the JAR file
+RUN mvn clean package -DskipTests
 
 #
-# Run
+# Runtime Stage
 #
-FROM openjdk:8-jdk
-
-EXPOSE 8080
+FROM openjdk:8-jre-slim
 
 WORKDIR /opt/shipping
 
+# Set environment variables
 ENV CART_ENDPOINT=cart:8080
 ENV DB_HOST=mysql
 
+# Copy the built jar from build stage
 COPY --from=build /opt/shipping/target/shipping-1.0.jar shipping.jar
 
-CMD [ "java", "-Xmn256m", "-Xmx768m", "-jar", "shipping.jar" ]
+# Expose the application port
+EXPOSE 8080
 
+# Run the application
+CMD ["java", "-Xmn256m", "-Xmx768m", "-jar", "shipping.jar"]
