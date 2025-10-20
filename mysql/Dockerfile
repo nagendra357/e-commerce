@@ -1,18 +1,28 @@
-FROM mysql:5.7
+#
+# Build Stage
+#
+FROM maven:3.8.6-openjdk-8 AS build
 
-VOLUME /data
+WORKDIR /opt/shipping
 
-ENV MYSQL_ALLOW_EMPTY_PASSWORD=yes \
-    MYSQL_DATABASE=cities \
-    MYSQL_USER=shipping \
-    MYSQL_PASSWORD=secret
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# change datadir entry in /etc/mysql/my.cnf
-COPY config.sh /root/
-RUN /root/config.sh
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-COPY scripts/* /docker-entrypoint-initdb.d/
+#
+# Runtime Stage
+#
+FROM openjdk:8-jre-slim
 
-#RUN /entrypoint.sh mysqld & while [ ! -f /tmp/finished ]; do sleep 10; done
-#RUN rm /docker-entrypoint-initdb.d/*
+WORKDIR /opt/shipping
 
+ENV CART_ENDPOINT=cart:8080
+ENV DB_HOST=mysql
+
+COPY --from=build /opt/shipping/target/shipping-1.0.jar shipping.jar
+
+EXPOSE 8080
+
+CMD ["java", "-Xmn256m", "-Xmx768m", "-jar", "shipping.jar"]
