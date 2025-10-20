@@ -55,4 +55,4 @@ jobs:
           context: ${{ matrix.service }}
           file: ${{ matrix.service }}/Dockerfile
           push: true
-          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_BASE }}${{ matrix.service }}:latest
+          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/e-commerce${{ matrix.service }}:latest
